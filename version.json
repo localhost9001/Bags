@@ -1,0 +1,11 @@
+{
+  "version": "1.0.2",
+  "releaseDate": "2026-04-15",
+  "notes": "Initial public release with auto-update support.",
+  "mandatory": false,
+  "win": {
+    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.2/Bags.exe",
+    "sha256": "a1703ead64472845a303020cd710456486e4173d34f7b553a74faf19dd0e14b4",
+    "size": 92429784
+  }
+}

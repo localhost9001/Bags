@@ -1,11 +1,11 @@
 {
-  "version": "1.0.3",
-  "releaseDate": "2026-04-15",
-  "notes": "Auto-updater telemetry, bug fixes, and optimizations.",
+  "version": "1.0.0",
+  "releaseDate": "2026-04-16",
+  "notes": "Initial release.",
   "mandatory": false,
   "win": {
-    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.3/Bags.exe",
-    "sha256": "3f3bd41af19a200c472c4a034ed26eba64113a526ac66b49aeb1f97946deb753",
-    "size": 92432394
+    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.0/Bags.exe",
+    "sha256": "539e070aef4b42c30e4728271f4993ac45dc139f3ffd9c83f4e266d6f7a0983e",
+    "size": 92430459
   }
 }

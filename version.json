@@ -1,11 +1,11 @@
 {
-  "version": "1.0.1",
-  "releaseDate": "2026-04-17",
-  "notes": "Discord integration (webhook), multi-select trade push, equity-curve animation capture (MP4/WebM), screenshot paste (Ctrl+V) in trade modal, performance throttling for chart animations.",
+  "version": "1.0.2",
+  "releaseDate": "2026-04-18",
+  "notes": "Widget Screensaver (4 ambient widgets with idle trigger), Multi-Monitor Pop-Out Tabs, Quick Trade local-date fix, and a full optimization + bug sweep pass.",
   "mandatory": false,
   "win": {
-    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.1/Bags.exe",
-    "sha256": "b2ed31e2b86a794099d95576d01ca068765f0b48c1bcd6eeacdcb5199fa15a49",
-    "size": 92450400
+    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.2/Bags.exe",
+    "sha256": "612d88ec861b49ebba0ae25d4f6b14185f2fbb8f35b4174645782358fecdda08",
+    "size": 92463050
   }
 }

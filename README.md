@@ -2,7 +2,7 @@
 
 A feature-rich desktop trade journal with a dark neon aesthetic, 3D market visualizations, multi-account analytics, and a full gamification engine. Your trade data is stored locally on your machine (see [Your Data](#your-data)).
 
-**Current version:** `v1.0.2` · **Platforms:** Windows · macOS · Linux · **License:** MIT
+**Current version:** `v1.0.1` · **Platforms:** Windows · macOS · Linux · **License:** MIT
 
 ---
 

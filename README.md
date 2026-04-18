@@ -2,7 +2,7 @@
 
 A feature-rich desktop trade journal with a dark neon aesthetic, 3D market visualizations, multi-account analytics, and a full gamification engine. Your trade data is stored locally on your machine (see [Your Data](#your-data)).
 
-**Current version:** `v1.0.0` · **Platforms:** Windows · macOS · Linux · **License:** MIT
+**Current version:** `v1.0.2` · **Platforms:** Windows · macOS · Linux · **License:** MIT
 
 ---
 
@@ -32,20 +32,24 @@ Bags is distributed from GitHub Releases. No sign-up, no installer, no telemetry
 - **macOS Gatekeeper**: If macOS blocks the app, right-click Bags in Applications → **Open** → **Open** again. Only needed once.
 - **No admin rights required.** Bags runs as a normal user.
 - **No account required.** Bags is fully local — there's no login, no cloud sync, no telemetry.
-- **Network access:** Bags only makes outbound network connections for auto-updates (fetching `version.json` from the public GitHub repo and downloading new releases). Your trade journal never leaves your machine.
+- **Network access:** Bags only makes outbound network connections for auto-updates (fetching `version.json` from the public GitHub repo and downloading new releases) and — if you explicitly configure it — Discord webhook posts to share trades or equity snapshots with your own server (see [Discord Integration](#discord-integration)). Your trade journal itself never leaves your machine.
 
 ### Auto-updates (Windows)
 
 Bags checks for updates on launch (3 seconds after startup) and every 4 hours while it's running.
 
-When a newer release is published on GitHub, the updater:
+When a newer release is detected you see an **Update Available** modal with a clear **Update Now / Update Later** choice. Dismissing is remembered per-version so the same release won't re-prompt until you restart. Once you hit Update Now, a progress pill in the bottom-right takes over with an animated fill bar through download → verify → install → relaunch.
+
+Under the hood, the updater:
 
 1. Fetches `version.json` from the public `localhost9001/Bags` repo (the manifest that pins the current latest version, download URL, and SHA256).
 2. Compares it to your running version via semver. If the manifest is the same or older, nothing happens.
 3. Downloads the new `Bags.exe` alongside the running one (as `Bags.new.exe`), with a 500 MB safety cap and a download timeout.
 4. Verifies the file size and SHA256 against the manifest. If either check fails, the download is discarded and you're told why.
 5. Renames the running `Bags.exe` to `Bags.old.exe` and moves the verified new build into place. If the swap fails for any reason, the original `Bags.exe` is automatically restored so you're never left in a bricked state.
-6. Spawns the new build detached and quits the current one. On next launch the leftover `Bags.old.exe` is cleaned up.
+6. Tears down the system tray, spawns the new build detached, and quits the current one. On next launch the leftover `Bags.old.exe` is cleaned up.
+
+After the relaunch, a **What's New** modal summarizes what changed in the new version — it only fires for returning users on a genuine version bump, and only once per release.
 
 Your trade data lives in a separate user-data folder (see [Your Data](#your-data)) and is never touched by the updater. You can also trigger a check manually from Settings → About → "Check for updates".
 
@@ -66,12 +70,13 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 - **Playbook** — Trading strategy cards with entry/exit/risk documentation. Ships with 3 sample strategies: VWAP Reclaim Long, Gap & Go Momentum, and a Gambling/Revenge Trade anti-pattern tracker for quantifying the cost of emotional trading.
 - **All Accounts** — Multi-account aggregated view with combined neon-glow equity curve, per-account stat cards with color-coded borders showing status badges and account numbers, 15 overall stat cards (gross P&L, commissions, wins/losses, profit factor, avg trade, best/worst day, trading days with green/red split, best/worst account), and a merged trade table spanning every account.
 - **Simulations** — 3D simulation lab with Account Sims / Market Sims mode toggle. Account sims include Strategy DNA Helix, Trade Constellation, Heat Terrain, Trade Bias Compass, Trade Spiral Galaxy, Bootstrap Confidence Tubes, Trade Battlefield Map, Neural Network Decision Viz, Market Gravitational Lensing, and Probability Cloud. Full camera controls: left-drag orbit, right-drag axis pan, WASD movement (hold Shift for speed boost), scroll zoom. Favorites system with star buttons and last-used ordering, drag-and-drop card reordering, resizable viewport, and pop-out to new window.
-- **Settings** — Tabbed layout: Preferences (timezone, date/time format, defaults, privacy blur, auto-backup — all apply instantly without a save button), Accounts (portfolios with status/number, blown accounts graveyard), Appearance (accent colors, star-field), Video/Sim (quality presets, GPU detection, anti-aliasing, shadows, particles, bloom, SSAO, ray tracing), Data (statistics, backups, danger zone), About (Run on Startup, System Tray, welcome tour, version info). Auto-detects GPU hardware and disables incompatible graphics settings.
+- **Settings** — Tabbed layout: Preferences (timezone, date/time format, defaults, privacy blur, auto-backup — all apply instantly without a save button), Accounts (portfolios with status/number, blown accounts graveyard), Appearance (accent colors, star-field), Video/Sim (quality presets, GPU detection, anti-aliasing, shadows, particles, bloom, SSAO, ray tracing), Discord (webhook URL, auto-send toggles, test button — see [Discord Integration](#discord-integration)), Data (statistics, backups, danger zone), About (Run on Startup, System Tray, welcome tour, version info). Auto-detects GPU hardware and disables incompatible graphics settings.
 
 ### Visual & Animation
 
 - **Animated SVG Bull Splash Screen** — Custom animated bull silhouette with market chart line animation, loading bar, and logo reveal on app startup.
 - **Neon-Glow Equity Curve** — 3-pass rendering (outer bloom, inner glow, sharp core) with breathing animation and a traveling pulse that flows toward the current price.
+- **Equity Curve Animation Capture** — Right-click the dashboard equity curve (or use the camera button) to record a 6-second MP4/WebM animation of your equity path drawing in with glow, pulse, and live-end-dot effects intact. Choose **Save to file** to drop it into any folder, or **Send to Discord** to pipe the clip straight into your configured webhook (see [Discord Integration](#discord-integration)). Recordings use `canvas.captureStream()` + `MediaRecorder` and fall back gracefully when hardware encoders are unavailable.
 - **Equity Curve Toggle** — Switch between animated line chart and daily candlestick view. Line mode colors each segment dynamically (green rising, red negative). Candlestick mode supports 1D, 1W, and 1M timeframes.
 - **Live End Dot** — Constant pulse animation on the equity curve endpoint. Color reflects today's P&L: green for profit, red for loss, animated white for no trades.
 - **Animated Star-Field Background** — Subtle parallax star particles drifting across the entire app background. Stars twinkle and glow with the accent color. Configurable density slider. Toggle in Settings.
@@ -112,6 +117,7 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 ### Trade Management
 
 - **Trade Screenshots / Image Attachments** — Attach chart screenshots to individual trades. Images stored as Base64 with thumbnail preview in the trade modal.
+- **Clipboard Screenshot Paste** — Press `Ctrl+V` (or `Cmd+V`) anywhere inside the trade modal to auto-attach a screenshot from the clipboard. Pair it with your broker's chart tool or `Win+Shift+S` / `Cmd+Shift+4` for a one-shot capture → paste → save workflow. Supports PNG and JPEG; oversized images are automatically downscaled.
 - **Trade Log Minimap** — Canvas-rendered minimap alongside the trade log showing green/red trade distribution. Click to jump to any trade. DPR-aware for retina displays.
 - **Virtual Scrolling** — Spacer-based virtualization for trade logs with 100+ rows. Only visible rows are rendered, with buffered off-screen rows for smooth scrolling.
 - **Multi-Select Trades** — Checkboxes on trade rows with select-all. Bulk delete, export selected as CSV.
@@ -127,6 +133,17 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 - **Collapsible Sidebar** — Toggle to icon-only mode for more screen space. Remembers collapsed state across sessions.
 - **Account Edit Modal** — Full modal dialog for creating and editing accounts with prop firm assignment from a searchable dropdown of 55+ firms, account number, animated status toggle, and color picker.
 - **Searchable Prop Firm Dropdown** — Type-ahead dropdown (Topstep, Apex, FTMO, Lucid, etc.) for assigning accounts to their funding source.
+
+### Discord Integration
+
+Bags can post trades and equity snapshots to a Discord channel via an incoming webhook. Everything is opt-in, the webhook URL never leaves your machine except when Bags itself calls Discord, and the integration can be disabled at any time from **Settings → Discord**.
+
+- **Webhook setup** — Paste your Discord webhook URL into **Settings → Discord**. Bags validates the URL against Discord's official hosts (`discord.com`, `discordapp.com`, `ptb.discord.com`, `canary.discord.com`) with a `/api/webhooks/...` path prefix, so unrelated URLs are rejected. A one-click **Test** button fires a sanity-check message so you can confirm the channel is live before wiring real trades into it.
+- **Auto-send on trade save** — Optional toggle that DMs your webhook a formatted embed every time you add or edit a trade: symbol, direction, P&L, R-multiple, entry/exit, account, setup, tags, and attached screenshots. Images are uploaded as multipart attachments (Discord's 25 MB-per-file cap is respected, with downscaling on oversized files).
+- **Auto-send on equity snapshot** — Optional toggle that posts a dashboard equity-curve screenshot with your daily/weekly/total P&L summary every time the dashboard refreshes after a new trade.
+- **Batch send from the trade log** — Multi-select any subset of trades in the Trade Log and right-click → **Send to Discord** to queue them all. Sends are rate-limit-aware: Bags honors Discord's `429 Retry-After` headers and spaces out the queue so you won't get throttled.
+- **Equity animation clips** — The **Send to Discord** option on the equity-curve recorder uploads the MP4/WebM clip directly to the channel with an optional caption.
+- **Safety net** — All outgoing traffic goes through the main-process `_postDiscordWebhook` helper which re-validates the URL host on every call, strips non-HTTPS schemes, caps upload size, times out hung requests, and never surfaces raw error bodies into the UI (so a broken webhook can't leak your token into logs).
 
 ### Security & Stability
 
@@ -151,7 +168,7 @@ All data is stored locally as a JSON file:
 | macOS | `~/Library/Application Support/bags/bags_data.json` |
 | Linux | `~/.config/bags/bags_data.json` |
 
-Backups are saved to the `backups/` subfolder. Up to 20 backups are retained automatically. Data persists across app updates — updates only replace the executable, never your journal.
+Backups are saved to the `backups/` subfolder. Up to 20 backups are retained automatically, with older ones pruned on each new backup. You can review backups and delete individual snapshots from **Settings → Data**. Data persists across app updates — updates only replace the executable, never your journal.
 
 Your trade records (trades, accounts, strategies, notes, screenshots) are **never** sent over the network by Bags. They live only in the JSON file above. The only network traffic Bags generates is the auto-updater, which fetches `version.json` from the public GitHub repo and downloads new releases when available.
 
@@ -160,6 +177,10 @@ Your trade records (trades, accounts, strategies, notes, screenshots) are **neve
 ## Trade Fields
 
 Date, Time In/Out, Symbol, Direction, Entry/Exit Price, Qty, Fees, Setup, Rating, Tags, Mistakes, Notes, Images (Base64 attachments).
+
+### Trading-day rollover (4:30 PM Central Time)
+
+Bags uses the prop-firm convention for "today." A new trading day starts at **4:30 PM Central Time** — the same time most prop firms (Topstep, Apex, etc.) wipe daily P&L back to zero and roll the session forward. Before 4:30 PM CT, new trades are stamped with today's calendar date; after 4:30 PM CT they're stamped with tomorrow's. This applies to the sidebar "Today's P&L," the daily-loss-limit bar, and the default date on the Add Trade modal. The rollover is computed in CT regardless of your machine's local timezone, so a Bags user trading the U.S. session from London or Sydney gets the same "today" as one sitting in Chicago.
 
 ---
 
@@ -170,6 +191,7 @@ Date, Time In/Out, Symbol, Direction, Entry/Exit Price, Qty, Fees, Setup, Rating
 | `Ctrl+N` / `Cmd+N` | Add new trade |
 | `Ctrl+G` / `Cmd+G` | Open 3D Equity Mountain |
 | `Ctrl+Shift+T` | Quick Trade popup (global — works even when Bags is minimized/hidden, requires System Tray enabled) |
+| `Ctrl+V` / `Cmd+V` | Paste clipboard screenshot as trade attachment (inside the Add/Edit Trade modal) |
 | `Esc` | Close any modal / split pane / context menu / 3D view / Quick Trade popup |
 | Right-click on trade row | Context menu with quick actions |
 | Click sidebar toggle | Collapse/expand sidebar |

@@ -2,7 +2,7 @@
 
 A feature-rich desktop trade journal with a dark neon aesthetic, 3D market visualizations, multi-account analytics, and a full gamification engine. Your trade data is stored locally on your machine (see [Your Data](#your-data)).
 
-**Current version:** `v1.0.1` · **Platforms:** Windows · macOS · Linux · **License:** MIT
+**Current version:** `v1.0.3` · **Platforms:** Windows · macOS · Linux · **License:** MIT
 
 ---
 
@@ -76,8 +76,9 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 
 - **Animated SVG Bull Splash Screen** — Custom animated bull silhouette with market chart line animation, loading bar, and logo reveal on app startup.
 - **Neon-Glow Equity Curve** — 3-pass rendering (outer bloom, inner glow, sharp core) with breathing animation and a traveling pulse that flows toward the current price.
-- **Equity Curve Animation Capture** — Right-click the dashboard equity curve (or use the camera button) to record a 6-second MP4/WebM animation of your equity path drawing in with glow, pulse, and live-end-dot effects intact. Choose **Save to file** to drop it into any folder, or **Send to Discord** to pipe the clip straight into your configured webhook (see [Discord Integration](#discord-integration)). Recordings use `canvas.captureStream()` + `MediaRecorder` and fall back gracefully when hardware encoders are unavailable.
+- **Equity Curve Animation Capture** — Click the camera button on the dashboard equity curve to record a 3/5/8/12-second MP4/WebM animation of your equity path drawing in with glow, pulse, and live-end-dot effects intact. The chart's draw-in animation automatically replays at the moment recording starts, so the saved video always captures motion instead of a frozen frame. Pick **Save to file** to drop it into any folder, or **Send to Discord** to pipe the clip straight into your configured webhook (see [Discord Integration](#discord-integration)). Recordings use `canvas.captureStream()` + `MediaRecorder` and fall back gracefully when hardware encoders are unavailable. Internally: the capture pipeline force-renders the canvas at full frame-rate for the duration of the clip (so clicking off the window mid-record no longer throttles to 5fps), uses `Blob` URLs for the preview + save paths (cheap, revoked on close), only pays the base64 cost at Discord-send time, and starts its duration timer from `MediaRecorder.onstart` so the encoder's warm-up doesn't eat the front of short clips.
 - **Equity Curve Toggle** — Switch between animated line chart and daily candlestick view. Line mode colors each segment dynamically (green rising, red negative). Candlestick mode supports 1D, 1W, and 1M timeframes.
+- **Trailing Liquidation Line** — When an account has a Max Loss Limit configured, both the line *and* candlestick equity curves paint a dashed yellow "marching-ants" rail that tracks the account's live trailing drawdown threshold. The line starts at `-(maxLoss + buffer)` and walks upward one step per new high-water mark until your HWM climbs past the buffer — at which point the rail locks permanently at your starting balance (0 on the P&L axis), mirroring Topstep-style trailing MLOL physics. An outer glow + crisp core pass keeps it legible against the green/red area fills, and the dashes animate in sync with the neon breath phase so the line pulses instead of looking static. A pulsing yellow **"LIQUIDATED"** label is anchored at the rightmost visible point of the rail on both curves — alpha + glow breathe in sync with the marching ants so the label feels like part of the same unit, and an auto-clamp keeps it from spilling across the Y-axis label column on tight timeframes. The aggregate *All Accounts* view intentionally skips the line — trailing drawdown is a per-account concept.
 - **Live End Dot** — Constant pulse animation on the equity curve endpoint. Color reflects today's P&L: green for profit, red for loss, animated white for no trades.
 - **Animated Star-Field Background** — Subtle parallax star particles drifting across the entire app background. Stars twinkle and glow with the accent color. Configurable density slider. Toggle in Settings.
 - **Animated Page Transitions** — Smooth fade+slide animations between pages. Every page navigation scrolls to top.
@@ -95,13 +96,15 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 - **3D Economic Calendar Timeline** — Your equity curve overlaid with generated economic event markers (FOMC, NFP, CPI, GDP, PPI, Retail Sales). See how your P&L reacts around major market catalysts.
 - **3D Portfolio Flight Path** — Animated toggle from Equity Mountain view. Cumulative P&L rendered as a 3D tube snaking through space with trade markers, trailing particle streams, and glow effects.
 - **SVG Icon System** — 50+ custom inline SVG icons replacing all emojis, themed to match accent colors via CSS variables.
-- **Animated Candlestick Logo** — Sidebar and titlebar logos use a 5-candle uptrend SVG with a smooth looping animation: the live candle retraces 50% at random intervals then continues upward.
+- **Animated Candlestick Logo** — Sidebar and titlebar logos use a 5-candle uptrend SVG with a smooth looping animation: the live candle retraces 50% at random intervals then continues upward. The sidebar replaces the static app name with a **live monospaced clock** (12-hour HH:MM:SS AM/PM) that ticks every second, pulled from the system's local time.
 - **Splash Screen Moon Candle** — The final candle in the splash chart rally blasts dramatically off-screen with a fast scale-up animation and intensifying neon glow.
 - **Welcome Tour** — Interactive 13-step animated walkthrough with spotlight highlighting, progress dots, and Ctrl+G shortcut introduction. Runs on first launch; restartable from Settings > About.
 - **Window State Persistence** — Remembers whether you last had the app fullscreen/maximized, along with window position and size.
 - **System Tray** — Enabled by default. When enabled, closing Bags minimizes it to the system tray instead of quitting. Double-click the tray icon to restore. Tray context menu with Open Bags, Quick Trade, and Quit.
 - **Run on Startup** — Enabled by default. Launches automatically when you log into your computer. On macOS, opens hidden in the tray if system tray is also enabled.
-- **Global Quick Trade Hotkey (`Ctrl+Shift+T`)** — When system tray is enabled, press `Ctrl+Shift+T` from anywhere on your system to pop up a Quick Trade window. Log a trade without opening the full app. Every field from the main trade modal: date, time in/out, symbol, direction, quantity, entry/exit price, commissions, setup, star rating, tags, mistakes, and notes — plus a live P&L preview. Supports Calculate P&L and Manual P&L entry modes.
+- **Global Quick Trade Hotkey (`Ctrl+Shift+T`)** — When system tray is enabled, press `Ctrl+Shift+T` from anywhere on your system to pop up a Quick Trade window. Log a trade without opening the full app. Every field from the main trade modal: date, time in/out, symbol, direction, quantity, entry/exit price, commissions, setup, star rating, tags, mistakes, and notes — plus a live P&L preview. Supports Calculate P&L and Manual P&L entry modes. Auto-calc is futures-aware — type `MNQ`, `ES`, `MCLH6`, `ZBZ5`, etc. and Bags applies the correct contract multiplier (MNQ=$2/pt, ES=$50/pt, MCL=$100/pt, …) so quantity × point-diff produces the real broker P&L instead of a stock-style tick sum.
+- **Widget Screensaver** — When the app sits idle for a configurable number of minutes (default 5, 1–120 range), Bags fades in a fullscreen ambient widget overlay. Choose between four widgets: an **Animated Equity Curve** that redraws your cumulative P&L with breathing neon glow, a **Minimal Starfield** with parallax drift and twinkle, a **Live Clock + Next Session Countdown** showing time, date, and a live ticker counting down to the next U.S. market session (pre-market, open, close) in America/New_York time with green/red delta from today's P&L, or a **Trade Stats Ticker** scrolling today/weekly/monthly/all-time P&L, win rate, trade count, best/worst trades, and current streak. Configure everything from **Settings → Preferences → Screensaver**: enable/disable, pick a widget, set idle minutes, and fire a **Preview** button to see it immediately. Any mouse, keyboard, or touch activity dismisses the overlay, and the screensaver will never appear on top of an open modal.
+- **Multi-Monitor Pop-Out Tabs** — Every page has a pop-out button in the top-right of its action bar. Click it to launch that tab in its own frameless window, ideal for spanning the app across multiple monitors. The pop-out window gets its own minimize/maximize/close controls, shares the same theme and accent color, and tears down cleanly on app quit. Pop out the Trade Log on one screen while keeping the Dashboard or 3D Simulations on another.
 
 ### Customization
 
@@ -110,6 +113,7 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 - **Account Color Coding** — Assign any of ~48 curated colors (organized by hue family) to each trading account for visual distinction throughout the app.
 - **Account Status Badges** — Animated glowing toggle in account modals to set status as Eval, Funded, Live, or Practice. Status badge displayed throughout the app.
 - **Account Number Tracking** — Optional account number field displayed in account cards, settings, and the aggregate view.
+- **Per-Account Max Loss Limit + Liquidation Buffer** — The account create/edit modal now has a **Max Loss Limit** input (e.g. `2000` for a 50K eval) and a companion **Liquidation Buffer** input (default `100`) that captures the dollar cushion your prop firm allows past the stated drawdown before the account is auto-liquidated. New accounts default to `2000 / 100`; existing accounts are left blank so no limit is silently imposed. Negatives and non-numeric input are clamped to `0`. These values feed the [Trailing Liquidation Line](#visual--animation) overlay on both equity curves and use the Topstep trailing formula `threshold = min(HWM, maxLoss + buffer) - (maxLoss + buffer)` so the rail locks at your starting balance the moment your peak equity climbs past the cap. Set Max Loss to `0` (or leave blank) to turn the overlay off for that account.
 - **Privacy Blur Mode** — Toggle in Settings > Preferences to blur all account numbers app-wide. Click any blurred number to temporarily reveal it.
 - **Customizable Dashboard Layout** — Drag and reorder dashboard widgets (stats, equity, charts, recent trades, streaks) into your preferred layout. Order persists across sessions.
 - **Blown Account Tracker** — "Blew" button on each account card in Settings. Pops a modal asking if it was a Trump tweet or self-inflicted, then closes the account and archives it to a blown accounts graveyard with final P&L, trade count, and date.
@@ -127,6 +131,9 @@ macOS and Linux clients don't auto-install — you'll be notified a new version 
 - **External ID Dedup** — CSV import detects broker-unique trade IDs (TopstepX, Tradovate, etc.) for perfect duplicate detection of multi-contract order fills.
 - **CSV Import Preview** — Summary showing new trades, duplicates, and parse errors before confirming import.
 - **Topstep-aware commissions import** — When the active account's prop firm is **Topstep** (or Topstep Forex), the CSV's `Commissions` column is summed with the `Fees` column because Topstep's export reports commissions as *round-turn* (both sides of the trade combined, effective 04/12/2026). For **any other prop firm** the `Commissions` column is intentionally ignored on import to avoid double-counting, because non-Topstep brokers don't guarantee round-turn semantics — map your broker's total per-trade fees into the `Fees` column instead.
+- **Manual vs Calculate P&L toggle** — The main Add Trade modal (and the `Ctrl+Shift+T` Quick Trade window) both have a toggle at the top of the form. **Calculate P&L** mode takes quantity + entry + exit + fees and computes gross/net live as you type. **Manual P&L** mode hides the quantity/entry/exit fields and lets you type the broker-reported net P&L directly — ideal for trades where the broker consolidates fills, applies weird fees, or reports fractional bond ticks that don't round-trip cleanly through decimal math. Reopening a manual-saved trade automatically puts the modal back into Manual mode with the net P&L prefilled.
+- **Futures-aware auto-calculation** — When you're in Calculate mode and type a recognized futures symbol, Bags applies the correct CME point-value multiplier so `(exit - entry) × qty × mult` lands on the real dollar P&L instead of a stock-style raw tick sum. Recognized families include equity index minis/micros (ES/MES, NQ/MNQ, YM/MYM, RTY/M2K), energy (CL/MCL, NG/QG), metals (GC/MGC, SI/SIL), crypto (BTC/MBT, ETH/MET), ags (ZC, ZW, ZS), and treasuries (ZB, ZN, ZF). Symbols with CME month+year suffixes (e.g. `MESH5`, `MNQU26`, `CLZ25`) prefix-match to the base contract, so CSV-imported trades work without cleanup. Unknown symbols fall back to `mult=1`, preserving the original (`shares × price-diff`) formula for stocks and options.
+- **Contract spec hint** — As you type a symbol in either trade modal, a small hint line appears underneath showing the matched contract: "Micro E-mini Nasdaq-100 · Micro · $2/pt", "WTI Crude Oil · Standard · $1000/pt", etc. Confirms at a glance that Bags resolved your ticker correctly.
 
 ### UI Chrome
 
@@ -180,46 +187,51 @@ Date, Time In/Out, Symbol, Direction, Entry/Exit Price, Qty, Fees, Setup, Rating
 
 ### Trading-day rollover (4:30 PM Central Time)
 
-Bags uses the prop-firm convention for "today." A new trading day starts at **4:30 PM Central Time** — the same time most prop firms (Topstep, Apex, etc.) wipe daily P&L back to zero and roll the session forward. Before 4:30 PM CT, new trades are stamped with today's calendar date; after 4:30 PM CT they're stamped with tomorrow's. This applies to the sidebar "Today's P&L," the daily-loss-limit bar, and the default date on the Add Trade modal. The rollover is computed in CT regardless of your machine's local timezone, so a Bags user trading the U.S. session from London or Sydney gets the same "today" as one sitting in Chicago.
+Bags uses the prop-firm convention for "today." A new trading day starts at **4:30 PM Central Time** — the same convention used by Topstep, TopstepX, and most funded-account prop firms. Any trade with an entry time between **4:30 PM CT** and **4:30 PM CT the following calendar day** is counted toward that next trading day. Calendar tiles, daily P&L cards, and streak calculations all respect this rollover so your numbers line up with what your broker reports.
 
 ---
 
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
-|----------|--------|
-| `Ctrl+N` / `Cmd+N` | Add new trade |
-| `Ctrl+G` / `Cmd+G` | Open 3D Equity Mountain |
+|---|---|
+| `Ctrl+N` | Open the Add Trade modal |
+| `Ctrl+V` | Paste a screenshot from the clipboard (inside the trade modal) |
+| `Ctrl+I` | Import CSV |
+| `Ctrl+E` | Export all trades as CSV |
+| `Ctrl+G` | Launch 3D Equity Mountain |
+| `Ctrl+F` | Focus the trade-log search box |
+| `Ctrl+,` | Open Settings |
 | `Ctrl+Shift+T` | Quick Trade popup (global — works even when Bags is minimized/hidden, requires System Tray enabled) |
-| `Ctrl+V` / `Cmd+V` | Paste clipboard screenshot as trade attachment (inside the Add/Edit Trade modal) |
+| `Ctrl+Shift+D` | Toggle the sidebar collapsed / expanded |
 | `Esc` | Close any modal / split pane / context menu / 3D view / Quick Trade popup |
-| Right-click on trade row | Context menu with quick actions |
-| Click sidebar toggle | Collapse/expand sidebar |
+| `Enter` | Submit the focused modal |
+| `Ctrl+1` … `Ctrl+7` | Jump to Dashboard, Trade Log, Analytics, Calendar, Progress, Calculator, Playbook |
+
+All shortcuts are handled in the renderer, so they only fire when a Bags window has focus — except `Ctrl+Shift+T`, which is registered as a global accelerator when System Tray is on.
 
 ---
 
 ## System Requirements
 
-- **Windows**: Windows 10 or newer (x64)
-- **macOS**: macOS 11 Big Sur or newer (Intel or Apple Silicon)
-- **Linux**: any modern 64-bit distro with glibc 2.28+ (Ubuntu 20.04+, Fedora 32+, etc.)
-- **GPU**: Any GPU from the last decade. Graphics settings auto-tune to your hardware. Software-rendered fallback is supported if no GPU is detected.
-- **Disk**: ~200 MB for the app, plus a few MB for your journal.
+- **Windows:** Windows 10 (1809) or later, x64. ~200 MB free disk for the portable build + your data folder.
+- **macOS:** macOS 11 Big Sur or later, Apple Silicon or Intel x64.
+- **Linux:** 64-bit glibc-based distribution (Ubuntu 20.04+, Fedora 34+, Arch rolling). Tested against Electron 28's GTK 3 requirements.
+- **GPU:** Any GPU that supports WebGL 2 / WebGPU for the 3D simulations. Bags auto-detects integrated/older GPUs and disables incompatible graphics settings (ray tracing, SSAO, bloom) by default — you can re-enable them from **Settings → Video/Sim** if you want to push your hardware.
+- **RAM:** 4 GB minimum, 8 GB recommended for the 3D Simulations page with large trade histories.
 
 ---
 
 ## Uninstall
 
-- **Windows (portable)**: Just delete `Bags.exe`. To remove your data too, delete `%APPDATA%\bags\`.
-- **macOS**: Drag Bags from Applications to the Trash. Data lives in `~/Library/Application Support/bags/`.
-- **Linux**: Delete the AppImage. Data lives in `~/.config/bags/`.
+**Windows (portable):** Just delete `Bags.exe`. Your journal data (`bags_data.json`, backups, settings) stays in `%APPDATA%\bags\` until you delete it manually (so a reinstall picks up exactly where you left off). To wipe everything, delete `%APPDATA%\bags\` as well.
+
+**macOS:** Drag `Bags.app` to the Trash. Your journal data lives in `~/Library/Application Support/bags/` and is not removed automatically; delete that folder if you want a clean slate.
+
+**Linux:** Remove the AppImage / installed binary. Your journal data lives in `~/.config/bags/` and is not removed automatically; delete that folder if you want a clean slate.
 
 ---
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
-
----
-
-*Built for serious traders.*
+Bags is distributed as-is for personal trade-journaling use. No warranty expressed or implied — trade responsibly, and always double-check your own P&L.

@@ -5,7 +5,7 @@
   "mandatory": false,
   "win": {
     "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.3/Bags.exe",
-    "sha256": "2336006420278c8be7291494942b18ca06082658fb24171bdc80a7cd46885116",
-    "size": 92475879
+    "sha256": "5288fbe8ffca5977c0c28562869412e72c9d3dc078ce6d8304c4d6e947863d98",
+    "size": 92475876
   }
 }

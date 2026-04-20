@@ -1,11 +1,11 @@
 {
-  "version": "1.0.2",
-  "releaseDate": "2026-04-18",
-  "notes": "Widget Screensaver (4 ambient widgets with idle trigger), Multi-Monitor Pop-Out Tabs, Quick Trade local-date fix, and a full optimization + bug sweep pass.",
+  "version": "1.0.3",
+  "releaseDate": "2026-04-20",
+  "notes": "Trailing liquidation line, manual/calc P&L toggle, futures-aware auto-calc, equity curve video capture fixes, bug fixes, and splash screen polish.",
   "mandatory": false,
   "win": {
-    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.2/Bags.exe",
-    "sha256": "612d88ec861b49ebba0ae25d4f6b14185f2fbb8f35b4174645782358fecdda08",
-    "size": 92463050
+    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.3/Bags.exe",
+    "sha256": "2336006420278c8be7291494942b18ca06082658fb24171bdc80a7cd46885116",
+    "size": 92475879
   }
 }

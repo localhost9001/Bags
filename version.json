@@ -1,11 +1,11 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "releaseDate": "2026-04-20",
-  "notes": "Trailing liquidation line, manual/calc P&L toggle, futures-aware auto-calc, equity curve video capture fixes, bug fixes, and splash screen polish.",
+  "notes": "Correctness fixes: persist-before-mutate enforced on duplicate trade, CSV integrity repair, account create/update, and sample data seed paths.",
   "mandatory": false,
   "win": {
-    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.3/Bags.exe",
-    "sha256": "5288fbe8ffca5977c0c28562869412e72c9d3dc078ce6d8304c4d6e947863d98",
-    "size": 92475876
+    "url": "https://github.com/localhost9001/Bags/releases/download/v1.0.4/Bags.exe",
+    "sha256": "d31eae685f7693b57ca14b8adda031df971a1e8ec31ab9d530ec222fc2d6c9cc",
+    "size": 92477979
   }
 }

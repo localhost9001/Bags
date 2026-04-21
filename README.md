@@ -2,7 +2,7 @@
 
 A feature-rich desktop trade journal with a dark neon aesthetic, 3D market visualizations, multi-account analytics, and a full gamification engine. Your trade data is stored locally on your machine (see [Your Data](#your-data)).
 
-**Current version:** `v1.0.3` · **Platforms:** Windows · macOS · Linux · **License:** MIT
+**Current version:** `v1.0.4` · **Platforms:** Windows · macOS · Linux · **License:** MIT
 
 ---
 
@@ -229,6 +229,25 @@ All shortcuts are handled in the renderer, so they only fire when a Bags window 
 **macOS:** Drag `Bags.app` to the Trash. Your journal data lives in `~/Library/Application Support/bags/` and is not removed automatically; delete that folder if you want a clean slate.
 
 **Linux:** Remove the AppImage / installed binary. Your journal data lives in `~/.config/bags/` and is not removed automatically; delete that folder if you want a clean slate.
+
+---
+
+## Changelog
+
+### v1.0.4 — April 20, 2026
+**Correctness fixes across trade ops and the auto-updater.**
+
+- **Duplicate trade** — the DB write result is now verified before the copied trade is added to the live list, preventing phantom duplicates appearing in the UI on a disk error.
+- **CSV integrity repair** — trades are now shallow-copied before the batch write so in-memory state can't be mutated if the write fails partway through.
+- **Account create / update** — both the create and update paths now check the DB result before updating UI state and showing the confirmation toast.
+- **Sample data seed** — the playbook seed loop now tracks and logs per-entry failures instead of silently skipping them.
+- **Auto-updater — rollback safety** — Phase 4 rollback now uses the same AV-lock-retry rename logic as the forward swap, preventing an instant-fail on AV-held files.
+- **Auto-updater — swap restore** — Phase 5 failure recovery now prefers a same-volume rename of `Bags.old.exe` back into place (fast, atomic) before falling back to a userData backup copy.
+- **Auto-updater — logging** — size-check and manifest verification failures now produce log entries; receipt write failures are logged rather than silently swallowed.
+- **Auto-updater — backup cleanup** — `Bags.backup.exe` in userData is deleted after a confirmed successful update so it no longer accumulates across releases.
+
+### v1.0.3 — April 2026
+Initial public release — core trade journal, 3D simulations, Discord integration, auto-updater.
 
 ---
 
